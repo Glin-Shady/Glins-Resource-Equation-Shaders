@@ -31,9 +31,6 @@ Thank you for downloading GRES.
 I'm doing my best forever so please support me!!
  
  Twitter : Glin Shady
-
-please follow me!!
- =================================
  
 Developer : Glin Shady
 
