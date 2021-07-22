@@ -1,0 +1,26 @@
+
+{
+    "format_version": 1,
+    "header": {
+        "description": "Made by Glin Shady",
+        "name": "§eGRES_B1",
+        "uuid": "1ab2a526-7d20-2203-2177-0dc7f51a3bd2",
+        "version": [1, 0, 0],
+        "min_engine_version": [1, 2, 6]
+    },
+    "modules": [
+        {
+            "description": "yeah!",
+            "type": "resources",
+            "uuid": "518d0003-c5aa-70b1-44b2-57816b816d50",
+            "version": [1, 0, 0]
+      }
+   ],
+     "subpacks": [
+     {
+      "folder_name": "dev_",
+      "name": "Have a nice day!",
+      "memory_tier": 1
+      }
+   ]
+}
