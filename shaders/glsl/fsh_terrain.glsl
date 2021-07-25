@@ -134,7 +134,7 @@ algorithm.rgb+=mix(vec3(0.),mix(mix(rsl,vec3(0.4),dusk),vec3(0.),smoothstep(1.,0
 
 #if !defined(ALWAYS_LIT)
 vec4 tex1=texture2D(TEXTURE_1,uv1);
-tex1.rgb*=pow(tex1.rgb,1.-vec3(1.5,1.6,2.));
+tex1.rgb*=pow(tex1.rgb,1.-vec3(1.3));
 algorithm*=mix(vec4(1),tex1,outdoor);
 
 algorithm*=texture2D(TEXTURE_1,vec2(lightmap*0.9,mix(uv1.y,3.,max(geto,getun))));
@@ -166,36 +166,30 @@ algorithm.rgb+=mix(vec3(0.),mix(mix(rsl2,vec3(0.6),dusk),vec3(0.),smoothstep(1.,
 #endif
 	#endif
 	#if BLOCK_SHADOW == 1
-algorithm.rgb=genshadow(algorithm.rgb,n,rainstrength,dusk,iswaters,lightmap,uv1,blockid);
+algorithm.rgb=genshadow(algorithm.rgb,n,rainstrength,dusk,iswaters,lightmap,uv1,getnether);
 	#endif
 	
 	#if B_GLOWING_ORES == 1
+#if !defined(ALPHA_TEST)&&!defined(BLEND)&&!defined(SEASONS)
 algorithm*=mix(vec4(1),mix(vec4(5.),vec4(1.),pow(wtime,2.)*pow(uv1.y,5.)),geto);
+#endif
 	#endif
-
-	#if FOGS == 1
 	
-vec3 fogclr=fc.rgb*mix(mix(mix(mix(vec3(1.2,1.1,1.),vec3(0.7),rainstrength),vec3(1.),getnether),vec3(0.9,0.7,0.6),dusk),vec3(0.2,0.85,0.9),getun);
-float fogdis=mix(mix(mix(mix(mix(0.6,5.5,rainstrength),3.,getun),0.8,dusk),0.,getnether),0.,nightf);
-
-algorithm.rgb=mix(tex.rgb,clr.rgb,smoothstep(0.,max(rd,2.),length(-wp*dis)));
-	#endif
 	#if VIGNETTE == 1
 float scr=1.-max(.0,max(.0,length(cp.xy))-0.65); 
 	algorithm.rgb*=scr;
 	#endif
 	#if ENABLE_TORCH_LIGHTNING == 1
-vec3 lightbase=mix(mix(vec3(tr,tg,tb)*2.0,vec3(0.,0.6,1.7)*1.05,getun),vec3(-0.2,0.6,1.7),gete);
-
+vec3 lightbase=mix(mix(mix(vec3(tr,tg,tb)*2.0,vec3(-0.2,0.6,1.7),gete),vec3(0.,0.6,1.7)*1.05,getun),vec3(tr,tg,tb)*0.9,getnether);
 //algorithm.rgb+=tex.rgb*(lightbase*1.05)*pow(lightmap*1.1,2.);//illumination end
-algorithm.rgb+=tex.rgb*(lightbase*1.05)*pow(lightmap*1.1,2.5);
+algorithm.rgb+=tex.rgb*(lightbase*1.05)*pow(lightmap*1.1,3.);
 	#endif
 	#if WORLD_COLORING == 1
-vec3 oclr=vec3(2.,1.7,1.);vec3 wetcol=vec3(1.1);vec3 endcl=vec3(.8,.9,1.4);vec3 hellcl=vec3(1.6,1.3,1.);
+vec3 oclr=vec3(2.,1.7,1.);vec3 wetcol=vec3(0.5);vec3 endcl=vec3(.8,.9,1.4);vec3 hellcl=vec3(2,1.4,1.);
 vec3 wclr=mix(mix(mix(mix(oclr.rgb,
-wetcol.rgb,rainstrength),vec3(0.7,1.5,1.8),getun),endcl.rgb,gete),hellcl.rgb,getnether);
+wetcol.rgb,rainstrength),hellcl,getnether),endcl.rgb,gete),vec3(0.7,1.5,1.8),getun);
 	algorithm.rgb=tonemapFilmic(algorithm.rgb*(uncharted2(algorithm.rgb*wclr)));
-
+	
 	#endif
 	#if UNDERWATER_CAUSTIC == 1
 #ifdef FANCY
@@ -205,7 +199,7 @@ wetcol.rgb,rainstrength),vec3(0.7,1.5,1.8),getun),endcl.rgb,gete),hellcl.rgb,get
 	#endif
 if(iswaters>0.5){
 algorithm.rgb*=vec3(0);
-	algorithm.rgb+=mix(vec3(0.02),mix(vec3(0.2,0.7,0.9),vec3(0.02),nightf),outdoor);
+	algorithm.rgb+=mix(vec3(0.02),mix(vec3(0.2,0.7,0.9),vec3(0.02),max(nightf,rainstrength)),outdoor);
 algorithm.a*=mix(1.,
 #ifdef FANCY
 0.8,
@@ -217,15 +211,19 @@ smoothstep(max(rd,2.5),1.,length(wp.xz*6.)));
 algorithm.rgb=reflectsun(algorithm.rgb,rd,wp,iswaters,sundusk,nightf,tex,n);
 	#endif
 	#if WATER_SURFACE_CAUSTIC == 1
-#ifdef FANCY
-algorithm.rgb=mix(algorithm.rgb,water_wave(algorithm.rgb,wp,mp,t),outdoor*smoothstep(max(rd,1.5),1.,length(wp.xz*7.)));
-#endif
+algorithm.rgb=water_wave(algorithm.rgb,wp,mp,t,n);
 	#endif
 	#if CLOUD_REFLECTION == 1
 algorithm=watercloud(algorithm,wp,t,p,iswaters,uv1);
 	#endif
 }
+	#if FOGS == 1
+	
+vec3 fogclr=fc.rgb*mix(mix(mix(mix(vec3(1.,1.05,1.1),vec3(0.7),rainstrength),vec3(1.),getnether),vec3(0.9,0.7,0.6),dusk),vec3(0.2,0.85,0.9),getun);
+float fogdis=mix(mix(mix(mix(mix(0.6,5.5,rainstrength),3.,getun),0.8,dusk),0.,getnether),0.,nightf);
 
+algorithm.rgb=mix(algorithm.rgb,fogclr.rgb,smoothstep(0.,max(rd,2.),length(-wp*fogdis)));
+	#endif
 gl_FragColor=algorithm; //Equation Shader
 #endif
 }

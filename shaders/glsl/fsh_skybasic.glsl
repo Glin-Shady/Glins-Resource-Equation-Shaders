@@ -100,6 +100,21 @@ Hme vec2 mod289(highp vec2 x){return x-floor(x*(1./289.))*289.;}
 Hme vec3 permute2(highp vec3 x){return mod289(((x*34.)+1.)*x);}
 Hme float gnoise(highp vec2 v){const highp vec4 C=vec4(.211324865405187,.366025403784439,-.577350269189626,.024390243902439);highp vec2 i=floor(v+dot(v,C.yy));highp vec2 x0=v-i+dot(i,C.xx);highp vec2 i1=x0.x>x0.y?vec2(1.,0.):vec2(0.,1.);highp vec4 x12=x0.xyxy+C.xxzz;x12.xy-=i1;i=mod289(i);highp vec3 p =permute2(permute2(i.y+vec3(0.,i1.y,1.))+i.x+vec3(0.,i1.x,1.));highp vec3 m=max(.5-vec3(dot(x0,x0),dot(x12.xy,x12.xy),dot(x12.zw,x12.zw)),0.);m=m*m;m=m*m;highp vec3 x =2.*fract(p*C.www)-1.;highp vec3 h=abs(x)-.5;highp vec3 ox=round(x);highp vec3 a0=x-ox;m*=inversesqrt(a0*a0+h*h);highp vec3 g;g.x=a0.x*x0.x+h.x*x0.y;g.yz=a0.yz*x12.xz+h.yz*x12.yw;return 170.*dot(m,g);}
 
+Hme float clnoise(Hme vec2 x,int octaves,Hme float t) {
+	Hme float v = 0.0;
+	Hme float a = 0.45;
+	Hme vec2 shift = vec2(1.);
+	// Rotate to reduce axial bias
+    mat2 rot = mat2(cos(1.), sin(1.), -sin(0.6), cos(0.6));
+	for (int i = 0; i < octaves; ++i) {
+		v += a * cloudnoise(x);
+		x = rot * x * 2.5 + shift;
+		a *= 0.35;
+		x.x+=t*0.01+float(i);
+	}
+	return v;
+}
+
 Hme float gfbm(Hme vec2 x,int octaves,Hme float t) {
 	Hme float v = 0.0;
 	Hme float a = 0.45;
@@ -137,7 +152,7 @@ float dusk_f=clamp(smoothstep((1.-wet_)*pow(wtime,2.),1.,min(smoothstep(0.4,0.5,
 
 //vec4 day=mix(vec4(0.,0.2,0.8,1.),vec4(1.1,1.,0.9,1.),length(p.xz*1.4)*1.6);
 
-vec4 day = mix(mix(vec4(0.3,0.4,0.7,1.),vec4(0.,0.2,0.8,1.)*1.45,length(p.xz*1.2)*1.55),vec4(1.,0.9,0.8,1),length(p.xz*1.2)*1.5);
+vec4 day = mix(mix(vec4(.1,.2,.26,1),vec4(0,.2,.8,1)*1.45,length(p.xz*1.2)*1.25),vec4(0.8,0.9,1.1,1),length(p.xz)*1.2);
 vec4 rain = mix(vec4(0.3),vec4(0.2),length(p.xz)*1.3); //sunrise-sunset
 vec4 dark = mix(vec4(0.1,0.1,0.1,1.0),vec4(0.,0.1,0.3,1.)*1.2,length(p.xz)*1.5); //night
 vec4 dusk = mix(vec4(.1,.2,.36,1.),vec4(2.,1.05,0,1),length(p.xz*0.9)*0.9); //dusk
@@ -147,15 +162,15 @@ vec4 skcl=mix(mix(mix(dark,day,day_f),rain,wet_),dusk,dusk_f*(1.-wet_));
 equations=skcl;
 	
 	#if CLOUD == 1
-vec4 nightcl=vec4(0.25,0.25,0.4,0.2);vec4 daycl=vec4(0.95,0.95,0.95,1);vec4 raincl=vec4(0.75);vec4 duskcl=vec4(0.3,0.2,0.05,1.);
+vec4 nightcl=vec4(0.25,0.25,0.4,0.2);vec4 daycl=vec4(0.99,0.94,0.93,1);vec4 raincl=vec4(0.75);vec4 duskcl=vec4(0.3,0.2,0.05,1.);
 vec4 clc=mix(mix(mix(nightcl,daycl,day_f),duskcl,dusk_f*(1.-wet_)),raincl,wet_);
 
 float sharp;
 float sharpf;
 #if CLOUD_TYPE == 1
-sharp=smoothstep(0.35,0.45,clnoise(t*0.005+p.xz*7.4,6,t));
-sharpf=smoothstep(0.35,0.7,clnoise(t*0.005+p.xz*6.8,4,t));
-if(sharpf>0.)clc*=mix(1.1,0.7,sharpf);
+sharp=smoothstep(0.43,0.5,clnoise(t*0.005+p.xz*7.4,6,t));
+sharpf=smoothstep(0.43,0.7,clnoise(t*0.005+p.xz*6.8,3,t));
+if(sharp>0.)clc*=mix(1.1,0.7,sharpf);
 vec4 fragcloud=mix(equations,clc,sharp);
 #else
 sharp=smoothstep(0.45,0.75,gfbm(t*0.01+p.xz*6.,4,t));
