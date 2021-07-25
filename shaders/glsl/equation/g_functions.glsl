@@ -33,6 +33,7 @@ uchimura tonemap : https://www.slideshare.net/nikuque/hdr-theory-and-practicce-j
 #define h4 Hme vec4
 
 #include "user/g_setting.h"
+
 #include "util.h"
 
 #define saturate(x) clamp(x,0.,1.)
@@ -77,20 +78,33 @@ h3 permute2(h3 x){return mod289(((x*34.)+1.)*x);}
 h1 gnoise(h2 v){const h4 C=vec4(.211324865405187,.366025403784439,-.577350269189626,.024390243902439);h2 i=floor(v+dot(v,C.yy));h2 x0=v-i+dot(i,C.xx);h2 i1=x0.x>x0.y?vec2(1.,0.):vec2(0.,1.);h4 x12=x0.xyxy+C.xxzz;x12.xy-=i1;i=mod289(i);h3 p =permute2(permute2(i.y+vec3(0.,i1.y,1.))+i.x+vec3(0.,i1.x,1.));h3 m=max(.5-vec3(dot(x0,x0),dot(x12.xy,x12.xy),dot(x12.zw,x12.zw)),0.);m=m*m;m=m*m;h3 x =2.*fract(p*C.www)-1.;h3 h=abs(x)-.5;h3 ox=round(x);h3 a0=x-ox;m*=inversesqrt(a0*a0+h*h);h3 g;g.x=a0.x*x0.x+h.x*x0.y;g.yz=a0.yz*x12.xz+h.yz*x12.yw;return 170.*dot(m,g);}
 
 
-h1 gcl(h2 x,int octaves,h1 t) {
+h1 gfbm(h2 x,int octaves,h1 t) {
 	h1 v = 0.0;
 	h1 a = 0.45;
-	h2 shift = vec2(100);
+	h2 shift = vec2(1000);
 	// Rotate to reduce axial bias
-    mat2 rot = mat2(cos(1.), sin(1.), -sin(0.6), cos(0.6));
+    mat2 rot = mat2(tan(1.), sin(0.4), -sin(1.), cos(0.5));
 	for (int i = 0; i < octaves; ++i) {
 		v += a * abs(cloudnoise(x));
 		x = rot*x*2.5+shift;
-		//x.y+=float(i+1);
-		x.x+=t*0.005*float(i+2);
 		a *= 0.5;
 	}
-	return smoothstep(0.25,0.55,v);
+	return v;
+}
+
+h1 clnoise(h2 x,int octaves,h1 t) {
+	h1 v = 0.0;
+	h1 a = 0.45;
+	h2 shift = vec2(1.);
+	// Rotate to reduce axial bias
+    mat2 rot = mat2(cos(1.), sin(1.), -sin(0.6), cos(0.6));
+	for (int i = 0; i < octaves; ++i) {
+		v += a * cloudnoise(x);
+		x = rot * x * 2.5 + shift;
+		a *= 0.35;
+		x.x+=t*0.01+float(i);
+	}
+	return v;
 }
 
 
@@ -127,34 +141,40 @@ vec3 uncharted2(vec3 color) {
   return curr * whiteScale;
 }
 
-float shadowpos(const vec2 uv2,vec3 n,float b){
+float shadowpos(const vec2 uv2,vec3 n,float ge){
 float shdpos;
-shdpos=mix(mix(0.,0.7,dot(n,vec3(0.,1.,1.))*mix(smoothstep(0.895,0.875,uv2.y),smoothstep(0.875,0.865,uv2.y),b)),0.7,max(dot(n,vec3(1.,-1.,-1.)),dot(n,vec3(-1.,-1.,-1.))));
+shdpos=mix(mix(mix(0.,0.7,dot(n,vec3(0.,1.,1.))*smoothstep(shadow_size_start,shadow_size_end,uv2.y)),0.7,max(dot(n,vec3(1.,-1.,-1.)),dot(n,vec3(-1.,-1.,-1.)))),0.,ge);
 //shdpos=mix(1.,0.,b);
 	return shdpos;
 }
 
-vec3 genshadow(vec3 eq,vec3 b,float rain,float dusk,float waterf,float ll,const vec2 uv2,float bp){
+vec3 genshadow(vec3 eq,vec3 b,float rain,float dusk,float waterf,float ll,const vec2 uv2,float ge){
 vec3 d=vec3(1.);
 vec3 shdclr=vec3(sr,sg,sb);
 float indoor=smoothstep(0.885,0.875,uv2.y);
-	//eq.rgb*=mix(mix(d,shdclr,saturate(dot(b,vec3(0.,1.,1.)))*indoor),d,ll)*mix(mix(shdclr,mix(d,vec3(2.,1.2,0.3),dusk*(1.-rain)),saturate(dot(b,vec3(0.,mix(1.,0.3,dusk*(1.-rain)),1.)))),d,ll);
 	
-	eq.rgb*=mix(mix(d,shdclr,shadowpos(uv2,b,bp)),d,ll);
+	eq.rgb*=mix(mix(mix(d,vec3(2.4,1.5,0.3),(1.-rain)*dusk*dot(b,vec3(0.,0.,1.))),shdclr,shadowpos(uv2,b,ge)),d,ll);
 	return eq;
 }
 
-vec3 water_wave(vec3 ww,h3 wp,h3 p,h1 t){
-float wa_wave = sin(cloudnoise(vec2(t*2.3+p.x*1.3+p.x+p.z*2.3, t*1.87+p.z+p.x*1.3+p.z*0.86+p.x*2.2)))+sin(cloudnoise(vec2(t*2.9+p.x*1.3+p.x+p.z*2.3, t*2.1+p.z+p.x*1.3+p.z*0.86+p.x*2.2)))
-+sin(cloudnoise(vec2(t*1.3+p.x*1.3+p.x+p.z*2.3, t*0.87+p.z+p.x*1.3+p.z*0.86+p.x*2.2)))
-+tan(cloudnoise(vec2(t*3.3+p.y*1.3+p.x+p.z*2.3, t*2.87+p.z+p.x*1.3+p.y*0.86+p.x*2.2)));
-ww.rgb+=mix(vec3(0),vec3(0,0.05,0.08),wa_wave);
-//ww.rgb+=cloudnoise(wp.xz*0.5*saturate(wa_wave))*0.42;
-return ww;
+vec3 water_wave(vec3 eq,h3 wp,h3 mp,h1 t,vec3 n){
+mp.xz*=vec2(.9,.6);
+mp.xz+=vec2(.3,.1);
+float wa_wave=abs(gnoise(vec2(t*1.3+mp.x*0.9+mp.x*0.6+mp.z*0.6,t*1.27+mp.z*0.7+mp.x*0.7+mp.z*0.56+mp.x*0.4)));
+float sharp=0.;
+
+#if CLOUD_TYPE == 1
+sharp=smoothstep(0.4,0.5,clnoise(t*0.005+wp.xz*0.03,3,t));
+#else
+sharp=0.;
+#endif
+eq.rgb+=mix(vec3(0),vec3(.15),wa_wave*sharp);
+return eq;
 }
 
-vec3 reflectsun(vec3 eq,float rd,h3 wp,float waterf,float dusk,float nights,vec4 tex,vec3 b){
-	eq.rgb+=mix(vec3(0),saturate(wp.z*2.5/rd*2.)*vec3(2,1.75,0.1)*saturate(-wp.x*2.5/rd*0.5),dusk)*mix(vec3(0),saturate(wp.z*2.5/rd*0.5)*vec3(2,1.75,0.1)*saturate(wp.x*2.5/rd*1.5),dusk);
+vec3 reflectsun(vec3 eq,float rd,h3 wp,float waterf,float dusk,float nights,vec4 tex,vec3 n){
+wp=reflect(wp,n);
+	eq.rgb+=max(mix(vec3(0),saturate(wp.z*3.5/rd*2.)*vec3(2,1.75,0.1)*saturate(-wp.x*1.5/rd*1.5),dusk),mix(vec3(0),saturate(wp.z*2.5/rd*0.5)*vec3(2,1.75,0.1)*saturate(wp.x*2.5/rd*1.5),dusk));
 	return eq;
 }
 
