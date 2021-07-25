@@ -1,0 +1,9 @@
+{
+  "materials": {
+    "version": "1.0.0",
+
+    "terrain_base": {
+      "vertexShader": "shaders/vsh_terrain.glsl",
+      "vrGeometryShader": "shaders/renderchunk.geometry",
+      "fragmentShader": "shaders/fsh_terrain.glsl"
+      }}}
