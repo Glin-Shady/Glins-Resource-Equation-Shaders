@@ -1,0 +1,60 @@
+// __multiversion__
+// This signals the loading code to prepend either #version 100 or #version 300 es as apropriate.
+
+
+/*
+
+/////D O N ' T  S T E A L  A N Y C O D E S !!!!
+
+///Made by Glin Shady
+///You must follow "GRES licence"
+
+/////D O N ' T  S T E A L  A N Y C O D E S !!!!
+
+*/
+
+
+
+
+#include "vertexVersionSimple.h"
+
+#include "uniformWorldConstants.h"
+#include "uniformPerFrameConstants.h"
+#include "uniformShaderConstants.h"
+
+attribute mediump vec4 POSITION;
+attribute vec4 COLOR;
+
+varying vec4 color;
+varying vec4 col;
+varying highp vec3 p;
+varying float fog;
+
+const float fogNear = 3.4;
+
+const vec3 inverseLightDirection = vec3(0);
+const float ambient = 0.9;
+
+LAYOUT_BINDING(1) uniform sampler2D TEXTURE_1;
+
+bool night_factor(){
+if(FOG_COLOR.r<0.15 && FOG_COLOR.g<0.15){
+return true;
+}else{
+return false;
+}}
+
+void main()
+{
+    POS4 pos = WORLDVIEWPROJ * POSITION;
+	POS4 worldPos = WORLD * POSITION;
+ 	gl_Position = pos;
+ 	
+ 	p = POSITION.xyz;
+    col = CURRENT_COLOR;
+    fog = COLOR.r; 
+
+  color = COLOR * col;
+
+color=vec4(0);
+}
