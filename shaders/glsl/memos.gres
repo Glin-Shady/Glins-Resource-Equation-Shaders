@@ -1,0 +1,22 @@
+#if USE_TEXEL_AA
+h3 normalbump_aa_gres(h3 bump,float wet,float isw,float isa){
+h4 path=bump*0.1;
+h1 height_bump=30.;
+path+=tex2a(0.0000002*height_bump);path*=tex2a(0.000012);path+=tex2a(0.000063);path-=tex2a(0.000075);path-=tex2a(0.000068);path-=tex2a(0.0000699);path*=tex2a(0.000052);
+
+	bump.rgb+=mix(vec3(0),path.rgb,(1.-isw)*(1.-wet)*(1.-isa));
+	return bump.rgb;
+}
+#else
+h3 normalbump_gres(h4 bump,float wet,float isw,float isa){
+h4 path=bump*.1;
+h1 height=0.00000001;
+h1 height_bump=30.;
+path+=tex2(0.0000002*height_bump,height*2.);path*=tex2(0.000012,height);
+path+=(getores(bump))?tex2(0.00063,height*2.):tex2(0.00013,height);
+path-=tex2(0.000075,height);path-=tex2(0.000068,height);path-=tex2(0.0000699,height);path*=tex2(0.000052,height);
+
+	bump.rgb+=mix(vec3(0),path.rgb,(1.-isw)*(1.-wet)*(1.-isa));
+return bump.rgb;
+}
+#endif

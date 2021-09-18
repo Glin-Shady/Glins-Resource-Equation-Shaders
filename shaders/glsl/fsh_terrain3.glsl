@@ -61,7 +61,7 @@ varying vec4 fogColor;
 
 #include "uniformShaderConstants.h"
 #include "util.h"
-#include "User/GRES_Database.h"
+#include "dont_enter_l.h"
 
 uniform vec2 FOG_CONTROL;
 uniform vec4 FOG_COLOR;

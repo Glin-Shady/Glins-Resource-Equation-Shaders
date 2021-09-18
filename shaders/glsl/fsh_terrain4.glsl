@@ -61,7 +61,7 @@ varying vec4 fogColor;
 
 #include "uniformShaderConstants.h"
 #include "util.h"
-#include "User/GRES_Database.h"
+#include "dont_enter_h.h"
 
 uniform vec2 FOG_CONTROL;
 uniform vec4 FOG_COLOR;
@@ -230,13 +230,13 @@ vec3 ambientcolor=mix(mix(mix(mix(mix(mix(mix(NightColor,DayColor,wtime),DuskCol
 	
 //underwater caustic
 vec3 mp=mod(eye.xyz,16.);
-mp.xz*=vec2(1.4,0.6);
+mp.xz*=vec2(1.4,0.9);
 float wave=snoise(vec2(t*0.8+mp.x*0.6+mp.x*0.3+mp.z*0.3, t*0.77+mp.z*0.4+mp.x*0.5+mp.z*0.26+mp.x*0.2))+snoise(vec2(t*0.7+mp.x*0.9+mp.x*0.4+mp.z*0.7, t*0.87+mp.z*0.6+mp.x*0.3+mp.z*0.56+mp.x*0.4));
 float caus=snoise(weye.xz*wave*.2);
 	
 	#if UNDERWATER_CAUSTIC == 1
-	//if(getunderwater(ft,fc,clr,uv1))
-	tex.rgb+=(getmaskunderwater(ft,fc,clr,uv1))?mix(vec3(0),vec3(.02),caus):vec3(0);
+	if(getmaskunderwater(ft,fc,clr,uv1))
+	tex.rgb+=mix(vec3(0),vec3(.02),wave);
 	#endif
 	
 //water
