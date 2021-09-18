@@ -1,0 +1,41 @@
+
+{
+    "format_version": 1,
+    "header": {
+        "description": "Made by Glin Shady\nYou can choose the versions.",
+        "name": "§eGRES_Rebuid 1.01",
+        "uuid": "1cc2a519-7d14-1449-2177-0dc7f51a3dd5",
+        "version": [1, 0, 0],
+        "min_engine_version": [1, 2, 6]
+    },
+    "modules": [
+        {
+            "description": "yeah!",
+            "type": "resources",
+            "uuid": "518d0101-c5aa-70b1-44b2-57816b816d91",
+            "version": [1, 0, 0]
+      }
+   ],
+     "subpacks": [
+     {
+     "folder_name": "custom",
+     "name": "\n\n§lCustom version.\n§e[ATTENTION] If you set this version,reload Minecraft (kill task).§r\n\nThe option file is  §eMinecraft/games/com.mojang/resourse_packs/GRES_Rebuild/shaders/glsl/User/GRES_Database.h§r\n\n§l§e[FOLLOW THIS RULE] DONT GENERATE RELINKS AND DONT USE IT.",
+     "memory_tier": 4
+     },
+     {
+     "folder_name": "high",
+     "name": "\n\n§lHigh version.\n§l§e[ATTENTION] If you set this version,reload Minecraft (kill task). §lAnd low-end-devices will be dead.§r\n\n§l§e[FOLLOW THIS RULE] DONT GENERATE RELINKS AND DONT USE IT.",
+     "memory_tier": 1
+     },
+     {
+     "folder_name": "superlite",
+     "name": "\n\n§lSuper Lite version.\n§e[ATTENTION] If you set this version,reload Minecraft (kill task).§r\n\n§l§e[FOLLOW THIS RULE] DONT GENERATE RELINKS AND DONT USE IT.",
+     "memory_tier": 2
+     },
+     {
+     "folder_name": "lite",
+     "name": "\n\n§lLite version.\n§l§e[ATTENTION] If you set this version,reload Minecraft (kill task).§r\n\n§l§e[FOLLOW THIS RULE] DONT GENERATE RELINKS AND DONT USE IT.",
+     "memory_tier": 3
+     }
+   ]
+}
