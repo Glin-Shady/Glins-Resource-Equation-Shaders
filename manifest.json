@@ -3,8 +3,8 @@
     "format_version": 1,
     "header": {
         "description": "Made by Glin Shady\nYou can choose the versions.",
-        "name": "§eGRES_Rebuid 1.01",
-        "uuid": "1cc2a519-7d14-1449-2177-0dc7f51a3dd5",
+        "name": "§eGRES_Rebuid dev",
+        "uuid": "1cc2a519-7d14-1449-2367-0dc7f51a3dd5",
         "version": [1, 0, 0],
         "min_engine_version": [1, 2, 6]
     },
@@ -12,7 +12,7 @@
         {
             "description": "yeah!",
             "type": "resources",
-            "uuid": "518d0101-c5aa-70b1-44b2-57816b816d91",
+            "uuid": "518d0101-c5aa-70b1-44b2-57816b816d51",
             "version": [1, 0, 0]
       }
    ],
